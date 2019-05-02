@@ -1,0 +1,32 @@
+{
+  "name": "resource_crawler",
+  "version": "0.0.1",
+  "main": "server.js",
+  "scripts": {
+    "server": "nodemon server.js",
+    "build": "node build.js"
+  },
+  "author": "TakuKobayashi",
+  "private": true,
+  "dependencies": {
+    "@line/bot-sdk": "^6.7.0",
+    "aws-sdk": "^2.444.0",
+    "axios": "^0.18.0",
+    "fastimage": "^2.0.1",
+    "swagger-express": "^1.0.5",
+    "underscore": "^1.9.1",
+    "underscore.string": "^3.3.5",
+    "url": "^0.11.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "archiver": "^3.0.0",
+    "dotenv": "^7.0.0",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "glob-promise": "^3.4.0",
+    "jest": "^24.7.1",
+    "nodemon": "^1.18.11"
+  },
+  "license": "MIT"
+}
