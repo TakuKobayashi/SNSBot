@@ -5,7 +5,7 @@ AWS.config.update({
 var dynamo = new AWS.DynamoDB.DocumentClient();
 
 var DynamoDB = function () {
-  this.getPromise = function (tablename, filterObject) {
+  this.getPromise = async function (tablename, filterObject) {
     return new Promise((resolve, reject) => {
       var params = {
         TableName: tablename,
