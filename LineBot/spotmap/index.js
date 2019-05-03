@@ -1,45 +1,42 @@
-var LineBot = require(__dirname + '/linebot.js');
+const line = require('@line/bot-sdk');
 
-var callLambdaResponse = function (promise, context) {
-  promise.then((response) => {
-    var lambdaResponse = {
-      statusCode: 200,
-      headers: {
-        "X-Line-Status": "OK"
-      },
-      body: JSON.stringify({
-        "result": "completed"
-      })
-    };
-    context.succeed(lambdaResponse);
-  }).catch(function (err) {
-    console.log(err);
-  });
+const callLambdaResponse = function (context) {
+  const lambdaResponse = {
+    statusCode: 200,
+    headers: {
+      "X-Line-Status": "OK"
+    },
+    body: JSON.stringify({
+      "result": "completed"
+    })
+  };
+  context.succeed(lambdaResponse);
 }
 
-exports.handler = function (event, context) {
+exports.handler = async function (event, context) {
   console.log(JSON.stringify(event));
-  var linebot = new LineBot(process.env.ACCESSTOKEN);
-  var lineClient = linebot.lineClient;
-  event.events.forEach(async function (lineMessage) {
+  const linebot = new line.Client({
+    channelAccessToken: process.env.ACCESSTOKEN
+  });
+  for (const lineMessage of event.events) {
     if (lineMessage.type == "follow") {
-      await linebot.follow(lineMessage.source.userId, lineMessage.timestamp);
-      callLambdaResponse(followPromise.then(function () {
-        //return linebot.linkRichMenu(lineMessage.source.userId, process.env.RICHMENUID1);
-      }), context);
+      //      await linebot.follow(lineMessage.source.userId, lineMessage.timestamp);
+      callLambdaResponse(context);
     } else if (lineMessage.type == "unfollow") {
-      callLambdaResponse(linebot.unfollow(lineMessage.source.userId, lineMessage.timestamp).then(function () {
-        //return linebot.unlinkRichMenu(lineMessage.source.userId, process.env.RICHMENUID1);
-      }), context);
+      callLambdaResponse(context);
     } else if (lineMessage.type == "postback") {
-      var receiveData = JSON.parse(lineMessage.postback.data);
+      const receiveData = JSON.parse(lineMessage.postback.data);
       console.log(receiveData);
     } else if (lineMessage.type == "message") {
-      var replyMessageObjectPromise = linebot.searchRestaurant(lineMessage);
-      if (!replyMessageObjectPromise) return;
-      callLambdaResponse(replyMessageObjectPromise.then(function (messageObj) {
-        return lineClient.replyMessage(lineMessage.replyToken, messageObj);
-      }), context);
+      const replyObj = {
+        type: 'text',
+        text: lineMessage.message.text
+      };
+      console.log(lineMessage);
+      // use reply API
+      const replyed = await linebot.replyMessage(lineMessage.replyToken, replyObj);
+      console.log(replyed);
+      callLambdaResponse(context);
     }
-  });
+  }
 };
