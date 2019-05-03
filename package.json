@@ -10,7 +10,7 @@
   "private": true,
   "dependencies": {
     "@line/bot-sdk": "^6.7.0",
-    "aws-sdk": "^2.444.0",
+    "aws-sdk": "^2.448.0",
     "axios": "^0.18.0",
     "fastimage": "^2.0.1",
     "swagger-express": "^1.0.5",
