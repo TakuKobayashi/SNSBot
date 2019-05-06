@@ -1,3 +1,5 @@
+const underscore = require('underscore');
+
 const SpotGachaLineBot = require(__dirname + '/spotgacha_linebot.js');
 const Restaurant = require(__dirname + '/restaurant.js');
 
@@ -32,10 +34,12 @@ exports.handler = async function (event, context) {
       console.log(receiveData);
     } else if (lineMessage.type == "message") {
       const restaurantObjects = await restaurant.searchRestaurant(lineMessage);
-      const replyMessageObj = linebot.convertReplayMessageObj(restaurantObjects);
-      const recordObj = await linebot.recordResponseMessage(lineMessageObj, restaurantObjects);
+      const restaurantSampleResult = underscore.sample(restaurantObjects, 10);
+
+      const replyMessageObj = linebot.convertReplayMessageObj(restaurantSampleResult);
+      const recordObj = await linebot.recordResponseMessage(lineMessageObj, restaurantSampleResult);
       console.log(recordObj);
-      const replyed = await linebot.replayMessage(lineMessage.replyToken, replyMessageObj);
+      const replyed = await linebot.replyMessage(lineMessage.replyToken, replyMessageObj);
       console.log(replyed);
       callLambdaResponse(context);
     }

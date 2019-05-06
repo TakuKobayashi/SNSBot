@@ -1,59 +1,63 @@
-var LineBot = require(__dirname + '/linebot.js');
+const HiwaiHubLineBot = require(__dirname + '/hiwaihub_linebot.js');
+const Pornsearch = require('pornsearch');
 
-var callLambdaResponse = function(promise, context){
-  promise.then((response) => {
-    var lambdaResponse = {
-      statusCode: 200,
-      headers: { "X-Line-Status": "OK"},
-      body: JSON.stringify({"result": "completed"})
-    };
-    context.succeed(lambdaResponse);
-  }).catch(function(err){
-    console.log(err);
-    console.log(JSON.stringify(err.originalError.response.data));
-  });
+const callLambdaResponse = function (context) {
+  const lambdaResponse = {
+    statusCode: 200,
+    headers: {
+      "X-Line-Status": "OK"
+    },
+    body: JSON.stringify({
+      "result": "completed"
+    })
+  };
+  context.succeed(lambdaResponse);
 }
 
-exports.handler = function (event, context) {
+exports.handler = async function (event, context) {
   console.log(JSON.stringify(event));
-  var linebot = new LineBot(process.env.ACCESSTOKEN);
-  var lineClient = linebot.lineClient;
-  event.events.forEach(function(lineMessage) {
-    if(lineMessage.type == "follow"){
-      var followPromise = linebot.follow(lineMessage.source.userId, lineMessage.timestamp);
-      var promise = followPromise.then(function(userData){
-        return linebot.generateConfirmMessage();
-      }).then(function(confirmObj){
-        return lineClient.replyMessage(lineMessage.replyToken, confirmObj);
-      });
-      callLambdaResponse(promise, context);
-    }else if(lineMessage.type == "unfollow"){
-      callLambdaResponse(linebot.unfollow(lineMessage.source.userId, lineMessage.timestamp).then(function(){
-        //return linebot.unlinkRichMenu(lineMessage.source.userId, process.env.RICHMENUID1);
-      }), context);
-    }else if(lineMessage.type == "postback"){
-      var receiveData = JSON.parse(lineMessage.postback.data);
-      if(receiveData.confirmed){
-        callLambdaResponse(linebot.updateConfirmState(lineMessage.source.userId, lineMessage.timestamp).then(function(){
-          //return linebot.linkRichMenu(lineMessage.source.userId, process.env.RICHMENUID1)
-        }), context);
-      }else{
-        callLambdaResponse(linebot.generateConfirmMessage().then(function(confirmObj){
-          return lineClient.replyMessage(lineMessage.replyToken, confirmObj);
-        }), context);
+  const linebot = new HiwaiHubLineBot(process.env.ACCESSTOKEN);
+  for(const lineMessage of event.events){
+    if (lineMessage.type == "follow") {
+      await linebot.follow(lineMessage.source.userId, lineMessage.timestamp);
+      const confirmObj = linebot.generateConfirmMessage();
+      const replyed = await linebot.replayMessage(lineMessage.replyToken, confirmObj);
+      console.log(replyed);
+      callLambdaResponse(context);
+    } else if (lineMessage.type == "unfollow") {
+      await linebot.unfollow(lineMessage.source.userId, lineMessage.timestamp);
+      callLambdaResponse(context);
+      //return linebot.unlinkRichMenu(lineMessage.source.userId, process.env.RICHMENUID1);
+    } else if (lineMessage.type == "postback") {
+      const receiveData = JSON.parse(lineMessage.postback.data);
+      if (receiveData.confirmed) {
+        await linebot.updateConfirmState(lineMessage.source.userId, lineMessage.timestamp);
+        callLambdaResponse(context);
+        //return linebot.linkRichMenu(lineMessage.source.userId, process.env.RICHMENUID1)
+      } else {
+        const confirmObj = linebot.generateConfirmMessage();
+        const replyed = await linebot.replayMessage(lineMessage.replyToken, confirmObj);
+        console.log(replyed);
+        callLambdaResponse(context);
       }
-    }else if(lineMessage.type == "message"){
-      var replyMessageObjectPromise = linebot.checkConfirmed(lineMessage.source.userId).then(function(userData){
-        return linebot.searchVideoAndGenerateReplyMessageObject(lineMessage);
-      }).catch(function(userData) {
-        callLambdaResponse(linebot.generateConfirmMessage().then(function(confirmObj){
-          return lineClient.replyMessage(lineMessage.replyToken, confirmObj);
-        }), context);
-      });
-      if(!replyMessageObjectPromise) return;
-      callLambdaResponse(replyMessageObjectPromise.then(function(messageObj){
-        return lineClient.replyMessage(lineMessage.replyToken, messageObj);
-      }), context);
+    } else if (lineMessage.type == "message") {
+      const confirmed = await linebot.checkConfirmed(lineMessage.source.userId);
+      if (!confirmed) {
+        const confirmObj = linebot.generateConfirmMessage();
+        const replyed = await linebot.replayMessage(lineMessage.replyToken, confirmObj);
+        console.log(replyed);
+        callLambdaResponse(context);
+        continue;
+      }
+
+      const searcher = new Pornsearch(keyword);
+      const videos = await searcher.videos();
+      const videoSamples = underscore.sample(videos, 10);
+
+      const messageObj = linebot.convertReplyMessageObj(lineMessage, videoSamples);
+      const replyed = await linebot.replayMessage(lineMessage.replyToken, messageObj);
+      console.log(replyed);
+      callLambdaResponse(context);
     }
   });
 };

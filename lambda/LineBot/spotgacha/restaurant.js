@@ -139,61 +139,6 @@ export default class Restaurant {
   //food	料理コード	料理（料理サブを含む)で絞りこむことができます。指定できるコードについては料理マスタAPI参照	 	5個まで指定可。*2
   //budget	検索用予算コード	予算で絞り込むことができます。指定できるコードについては予算マスタAPI参照	 	2個まで指定可。*2
 
-  async lotRestaurant(searchObj = {}) {
-    var self = this;
-    var requestResults = [];
-    return self.requestGnavi(searchObj).then(function (gnaviResponse) {
-      var shops = gnaviResponse.body.rest;
-      for (var i = 0; i < shops.length; ++i) {
-        var restaurantObj = {
-          id: "gnavi_" + shops[i].id,
-          orginal_id: shops[i].id,
-          latitude: shops[i].latitude,
-          longitude: shops[i].longitude,
-          address: shops[i].address,
-          name: shops[i].name,
-          description: shops[i].pr.pr_long || shops[i].pr.pr_short,
-          url: shops[i].url_mobile || shops[i].url,
-          phone_number: shops[i].tel || shops[i].tel_sub,
-          icon_url: shops[i].image_url.shop_image1 || shops[i].image_url.shop_image2,
-          coupon_url: shops[i].coupon_url.mobile || shops[i].coupon_url.pc,
-          opentime: shops[i].opentime,
-          holiday: shops[i].holiday,
-        };
-        requestResults.push(restaurantObj);
-      }
-      return self.requestHotpepper(searchObj)
-    }).then(function (hotpepperResponse) {
-      return new Promise((resolve, reject) => {
-        console.log(JSON.stringify(hotpepperResponse.body));
-        var shops = hotpepperResponse.body.results.shop;
-        for (var i = 0; i < shops.length; ++i) {
-          var restaurantObj = {
-            id: "hotpepper_" + shops[i].id,
-            orginal_id: shops[i].id,
-            latitude: shops[i].lat,
-            longitude: shops[i].lng,
-            address: shops[i].address,
-            name: shops[i].name,
-            description: shops[i].catch,
-            url: shops[i].urls.pc,
-            phone_number: null,
-            icon_url: shops[i].photo.mobile.l || shops[i].photo.mobile.s || shops[i].photo.pc.l || shops[i].photo.pc.m || shops[i].photo.pc.s,
-            coupon_url: shops[i].coupon_urls.sp || shops[i].coupon_urls.pc,
-            opentime: shops[i].open,
-            holiday: shops[i].close,
-          };
-          requestResults.push(restaurantObj);
-        }
-        resolve(requestResults);
-      });
-    }).then(function (results) {
-      return new Promise((resolve, reject) => {
-        resolve(underscore.sample(results, 10));
-      });
-    });
-  }
-
   convertToRestaurantsFromGnaviShop(shop) {
     return {
       id: "gnavi_" + shop.id,

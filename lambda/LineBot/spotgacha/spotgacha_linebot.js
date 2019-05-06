@@ -1,4 +1,5 @@
 const LineBot = require(__dirname + '/libs/linebot.js');
+const underscore = require('underscore');
 
 export default class SpotGachaLineBot extends LineBot {
   constructor(applicationName, accessToken) {
@@ -21,10 +22,10 @@ export default class SpotGachaLineBot extends LineBot {
       response_object: response_object,
       created_at: lineMessageObj.timestamp
     }
-    return await dynamodb.createPromise("bot_messages", insertObject);
+    return dynamodb.createPromise("bot_messages", insertObject);
   }
 
-  convertReplayMessageObj(restaurantObjs) {
+  convertReplyMessageObj(restaurantObjs) {
     const messageObj = {
       type: "template",
       altText: "お店の候補はこちら!!",

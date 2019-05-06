@@ -88,7 +88,7 @@ export default class LineBot {
     return this.lineClient.unlinkRichMenuFromUser(userId)
   }
 
-  async createRichmenu(richMenuObj) {
+  async createRichMenu(richMenuObj) {
     return this.lineClient.createRichMenu(richMenuObj);
   }
 }
