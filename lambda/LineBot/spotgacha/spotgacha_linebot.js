@@ -1,4 +1,5 @@
-const LineBot = require(__dirname + '/libs/linebot.js');
+const requireRoot = require('app-root-path').require;
+const LineBot = requireRoot("/libs/linebot");
 const underscore = require('underscore');
 
 export default class SpotGachaLineBot extends LineBot {

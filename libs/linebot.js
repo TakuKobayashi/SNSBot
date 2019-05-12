@@ -6,7 +6,8 @@ const userStatusEnum = {
   unfollow: 1,
 }
 
-const DynamoDB = require(__dirname + '/dynamodb.js');
+const requireRoot = require('app-root-path').require;
+const DynamoDB = requireRoot("/libs/dynamodb");
 const dynamodb = new DynamoDB();
 
 export default class LineBot {
@@ -88,7 +89,7 @@ export default class LineBot {
     return this.lineClient.unlinkRichMenuFromUser(userId)
   }
 
-  async createRichmenu(richMenuObj) {
+  async createRichMenu(richMenuObj) {
     return this.lineClient.createRichMenu(richMenuObj);
   }
 }

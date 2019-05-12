@@ -1,7 +1,8 @@
-const LineBot = require(__dirname + '/libs/linebot.js');
+const requireRoot = require('app-root-path').require;
+const LineBot = requireRoot("/libs/linebot");
+
 const underscore = require('underscore');
 const underscoreString = require("underscore.string");
-
 export default class HiwaiHubLineBot extends LineBot {
   constructor(applicationName, accessToken) {
     super(applicationName, accessToken);
